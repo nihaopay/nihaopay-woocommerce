@@ -75,7 +75,7 @@ function init_woocommerce_nihaopay() {
 	     * Check if this gateway is enabled and available in the user's country
 	     */
 	    function is_valid_for_use() {
-	        if (!in_array(get_option('woocommerce_currency'), array('USD','GBP','HKD','JPY','EUR','CAD'))) 
+	        if (!in_array(get_option('woocommerce_currency'), array('USD','GBP','HKD','JPY','EUR','CAD','CNY'))) 
 	        	return false;
 
 	        return true;
@@ -132,6 +132,20 @@ function init_woocommerce_nihaopay() {
 								'type' => 'text', 
 								'description' => __( 'API Token', 'woocommerce' ),
 								'default' => ''
+				),
+				'currency' => array(
+								'title' => __( 'Settle Currency', 'woocommerce' ), 
+								'type' => 'select', 
+								'options' => array( 
+													'USD' => 'USD',
+													'JPY' => 'JPY',
+													'HKD' => 'HKD',
+													'EUR' => 'EUR',
+													'GBP' => 'GBP',
+													'CAD' => 'CAD'
+													),
+								'description' => __( 'Settlement Currency from NihaoPay', 'woocommerce' ),
+								'default' => 'USD'
 				),
 				'mode' => array(
 								'title' => __('Mode', 'woocommerce'),
@@ -194,13 +208,21 @@ function init_woocommerce_nihaopay() {
 	        $orderid = $time_stamp . "-" . $order_id;
 
 	        $nhp_arg[]=array();
-			$currency = get_option('woocommerce_currency');
-	        $nhp_arg['currency']=$currency;
-			if($currency != 'JPY') {
-				$nhp_arg['amount']=$order->order_total * 100;
-			} else {
-				$nhp_arg['amount']=$order->order_total;
-			}
+			
+			$mark_currency = get_option('woocommerce_currency');
+	        
+	        $nhp_arg['currency']=$this->currency;
+	        
+	        if($mark_currency =='CNY'){
+	        	$nhp_arg['rmb_amount']=$order->order_total * 100;
+	        }else{
+	        	if($mark_currency != 'JPY') {
+					$nhp_arg['amount']=$order->order_total * 100;
+				} else {
+					$nhp_arg['amount']=$order->order_total;
+				}
+	        }
+			
 	        $nhp_arg['ipn_url']=$this->notify_url;
 	        $nhp_arg['callback_url']=$order->get_checkout_order_received_url();
 	        $nhp_arg['show_url']=$order->get_cancel_order_url();
