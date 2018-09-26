@@ -1,9 +1,9 @@
 <?php
 /**
  * Plugin Name: NihaoPay Gateway for WooCommerce
- * Plugin Name: 
+ * Plugin Name:
  * Description: Allows you to use UnionPay, AliPay and WechatPay through NihaoPay Gateway
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: nihaopay
  * Author URI: https://www.nihaopay.com
  *
@@ -18,21 +18,23 @@ function init_woocommerce_nihaopay() {
     if ( ! class_exists( 'WC_Payment_Gateway' ) ) { return; }
 
 	class woocommerce_nihaopay extends WC_Payment_Gateway{
-		
+
 		public function __construct() {
 
 			global $woocommerce;
-			
+
 			$plugin_dir = plugin_dir_url(__FILE__);
-	        
+
 	        $this->id               = 'nihaopay';
-	        $this->icon     		= apply_filters( 'woocommerce_nihaopay_icon', ''.$plugin_dir.'/nihaopay_methods.png' );
+	        $this->wechat_pay_icon     		= apply_filters( 'woocommerce_nihaopay_wechat_pay_icon', ''.$plugin_dir.'/WeChat-Pay.png' );
+	        $this->alipay_icon     		= apply_filters( 'woocommerce_nihaopay_alipay_icon', ''.$plugin_dir.'/AliPay.png' );
+	        $this->unionpay_icon     		= apply_filters( 'woocommerce_nihaopay_unionpay_icon', ''.$plugin_dir.'/UnionPay.png' );
 	        $this->has_fields       = true;
 
 	        $this->init_form_fields();
 	        $this->init_settings();
-	        
-	        // variables            
+
+	        // variables
 	        $this->title            = $this->settings['title'];
 			$this->token			= $this->settings['token'];
 			$this->mode             = $this->settings['mode'];
@@ -44,18 +46,18 @@ function init_woocommerce_nihaopay() {
 			}else if( $this->mode == 'live' ){
 				$this->gateway_url = 'https://api.nihaopay.com/v1.2/transactions/securepay';
 			}
-	        
+
 	        // actions
 			add_action( 'woocommerce_receipt_nihaopay', array( $this, 'receipt_page' ) );
 	        add_action( 'woocommerce_update_options_payment_gateways', array( $this, 'process_admin_options' ) );
 			add_action( 'woocommerce_update_options_payment_gateways_' . $this->id, array( $this, 'process_admin_options' ) );
 			add_action( 'woocommerce_api_wc_nihaopay', array( $this, 'check_ipn_response' ) );
-			
+
 			if ( !$this->is_valid_for_use() ) {
-				$this->enabled = false; 
+				$this->enabled = false;
 			}
 		}
-			
+
 		/**
 		 * get_icon function.
 		 *
@@ -65,32 +67,38 @@ function init_woocommerce_nihaopay() {
 		function get_icon() {
 			global $woocommerce;
 			$icon = '';
-			if ( $this->icon ) {
-				$icon = '<img src="' . $this->force_ssl( $this->icon ) . '" alt="' . $this->title . '" />';
-			} 
-			return apply_filters( 'woocommerce_gateway_icon', $icon, $this->id );
+			if ( $this->wechat_pay_icon ) {
+				$icon.= '<img src="' . $this->force_ssl( $this->wechat_pay_icon ) . '" alt="' . $this->title . '" width="82" height="26" />';
+			}
+			if ( $this->alipay_icon ) {
+				$icon.= '<img src="' . $this->force_ssl( $this->alipay_icon ) . '" alt="' . $this->title . '" width="74" height="26" />';
+			}
+			if ( $this->unionpay_icon ) {
+				$icon.= '<img src="' . $this->force_ssl( $this->unionpay_icon ) . '" alt="' . $this->title . '" width="42" height="26" />';
+			}
+			return apply_filters( 'woocommerce_gateway_icons', $icon, $this->id );
 		}
 
 	     /**
 	     * Check if this gateway is enabled and available in the user's country
 	     */
 	    function is_valid_for_use() {
-	        if (!in_array(get_option('woocommerce_currency'), array('USD','GBP','HKD','JPY','EUR','CAD','CNY'))) 
+	        if (!in_array(get_option('woocommerce_currency'), array('USD','GBP','HKD','JPY','EUR','CAD','CNY')))
 	        	return false;
 
 	        return true;
 	    }
-	        
+
 	    /**
-	    * Admin Panel Options 
-	    **/       
+	    * Admin Panel Options
+	    **/
 	    public function admin_options()
 	    {
 			?>
 	        <h3><?php _e('NihaoPay', 'woocommerce'); ?></h3>
 	        <p><?php _e('NihaoPay Gateway supports AliPay, WeChatPay and UnionPay.', 'woocommerce'); ?></p>
 			<table class="form-table">
-	        <?php           
+	        <?php
 	    		if ( $this->is_valid_for_use() ) :
 
 	    			// Generate the HTML For the settings form.
@@ -112,31 +120,31 @@ function init_woocommerce_nihaopay() {
 	    * Initialise NihaoPay Settings Form Fields
 	    */
 	    public function init_form_fields() {
-	            
+
 			//  array to generate admin form
 	        $this->form_fields = array(
 	        	'enabled' => array(
-	            				'title' => __( 'Enable/Disable', 'woocommerce' ), 
-			                    'type' => 'checkbox', 
-			                    'label' => __( 'Enable NihaoPay', 'woocommerce' ), 
+	            				'title' => __( 'Enable/Disable', 'woocommerce' ),
+			                    'type' => 'checkbox',
+			                    'label' => __( 'Enable NihaoPay', 'woocommerce' ),
 			                    'default' => 'yes'
 							),
 				'title' => array(
-			                    'title' => __( 'Title', 'woocommerce' ), 
-			                    'type' => 'text', 
-			                    'description' => __('This is the title displayed to the user during checkout.', 'woocommerce' ), 
+			                    'title' => __( 'Title', 'woocommerce' ),
+			                    'type' => 'text',
+			                    'description' => __('This is the title displayed to the user during checkout.', 'woocommerce' ),
 			                    'default' => __( 'NihaoPay', 'patsatech-woo-nihaopay-server' )
 			                ),
 				'token' => array(
-								'title' => __( 'API Token', 'woocommerce' ), 
-								'type' => 'text', 
+								'title' => __( 'API Token', 'woocommerce' ),
+								'type' => 'text',
 								'description' => __( 'API Token', 'woocommerce' ),
 								'default' => ''
 				),
 				'currency' => array(
-								'title' => __( 'Settle Currency', 'woocommerce' ), 
-								'type' => 'select', 
-								'options' => array( 
+								'title' => __( 'Settle Currency', 'woocommerce' ),
+								'type' => 'select',
+								'options' => array(
 													'USD' => 'USD',
 													'JPY' => 'JPY',
 													'HKD' => 'HKD',
@@ -150,7 +158,7 @@ function init_woocommerce_nihaopay() {
 				'mode' => array(
 								'title' => __('Mode', 'woocommerce'),
 			                    'type' => 'select',
-			                    'options' => array( 
+			                    'options' => array(
 													'test' => 'Test',
 													'live' => 'Live'
 													),
@@ -159,14 +167,14 @@ function init_woocommerce_nihaopay() {
 							)
 				);
 		}
-	    
+
 		/**
 		 * Generate the nihaopayserver button link
 		 **/
 	    public function generate_nihaopay_form( $order_id ) {
 			global $woocommerce;
 	        $order = new WC_Order( $order_id );
-			
+
 			wc_enqueue_js('
 					jQuery("body").block({
 							message: "<img src=\"'.esc_url( $woocommerce->plugin_url() ).'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" style=\"float:left; margin-right: 10px;\" />'.__('Thank you for your order. We are now redirecting you to verify your card.', 'woothemes').'",
@@ -187,32 +195,32 @@ function init_woocommerce_nihaopay() {
 						});
 					jQuery("#submit_nihaopay_payment_form").click();
 				');
-				
+
 				return '<form action="'.esc_url( get_transient('nihaopay_next_url') ).'" method="post" id="nihaopay_payment_form">
 						<input type="submit" class="button alt" id="submit_nihaopay_payment_form" value="'.__('Submit', 'woothemes').'" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__('Cancel order', 'woothemes').'</a>
 					</form>';
-			
+
 		}
-	    
+
 		/**
-		* 
+		*
 	    * process payment
-	    * 
+	    *
 	    */
 	    function process_payment( $order_id ) {
 			global $woocommerce;
-			
+
 	        $order = new WC_Order( $order_id );
-	        
+
 	        $time_stamp = date("YmdHis");
 	        $orderid = $time_stamp . "-" . $order_id;
 
 	        $nhp_arg[]=array();
-			
+
 			$mark_currency = get_option('woocommerce_currency');
-	        
+
 	        $nhp_arg['currency']=$this->currency;
-	        
+
 	        if($mark_currency =='CNY'){
 	        	$nhp_arg['rmb_amount']=$order->order_total * 100;
 	        }else{
@@ -222,7 +230,7 @@ function init_woocommerce_nihaopay() {
 					$nhp_arg['amount']=$order->order_total;
 				}
 	        }
-			
+
 	        $nhp_arg['ipn_url']=$this->notify_url;
 	        $nhp_arg['callback_url']=$order->get_checkout_order_received_url();
 	        $nhp_arg['show_url']=$order->get_cancel_order_url();
@@ -231,24 +239,24 @@ function init_woocommerce_nihaopay() {
 	        $nhp_arg['terminal']=$this->terminal;
 	        $nhp_arg['note']=$order_id;
 
-			
+
 	        $post_values = "";
 	        foreach( $nhp_arg as $key => $value ) {
 	            $post_values .= "$key=" . $value . "&";
 	        }
 	        $post_values = rtrim( $post_values, "& " );
-	        
-	        $response = wp_remote_post($this->gateway_url, array( 
+
+	        $response = wp_remote_post($this->gateway_url, array(
 											'body' => $post_values,
 											'method' => 'POST',
 	                						'headers' => array( 'Content-Type' => 'application/x-www-form-urlencoded', 'Authorization' => 'Bearer '.$this->token ),
 											'sslverify' => FALSE
 											));
 
-			if (!is_wp_error($response)) { 
+			if (!is_wp_error($response)) {
 	        	$resp=$response['body'];
-			$res=gzcompress(base64_encode(esc_attr($resp)));	
-	        	$redirect = $this->force_ssl( WP_PLUGIN_URL ."/" . plugin_basename( dirname(__FILE__) ) . '/redirect.php').'?res='. urlencode($res);			
+			$res=gzcompress(base64_encode(esc_attr($resp)));
+	        	$redirect = $this->force_ssl( WP_PLUGIN_URL ."/" . plugin_basename( dirname(__FILE__) ) . '/redirect.php').'?res='. urlencode($res);
 				return array(
 					'result' 	=> 'success',
 					'redirect'	=> $redirect
@@ -290,11 +298,11 @@ function init_woocommerce_nihaopay() {
 		function receipt_page( $order ) {
 			global $woocommerce;
 			echo '<p>'.__('Thank you for your order.', 'woothemes').'</p>';
-			
+
 			echo $this->generate_nihaopay_form( $order );
-			
+
 		}
-		
+
 		private function force_ssl($url){
 			if ( 'yes' == get_option( 'woocommerce_force_ssl_checkout' ) ) {
 				$url = str_replace( 'http:', 'https:', $url );
@@ -319,14 +327,14 @@ function init_woocommerce_nihaopay() {
             	wp_die( "Payment failed. Please try again." );
             }
         }
-	} 
+	}
 
 	/**
 	 * Add the gateway to WooCommerce
 	 **/
-	function add_nihaopay_gateway( $methods ) 
+	function add_nihaopay_gateway( $methods )
 	{
-	    $methods[] = 'woocommerce_nihaopay'; 
+	    $methods[] = 'woocommerce_nihaopay';
 	    return $methods;
 	}
 	add_filter('woocommerce_payment_gateways', 'add_nihaopay_gateway' );
