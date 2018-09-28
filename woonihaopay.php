@@ -39,7 +39,7 @@ function init_woocommerce_nihaopay() {
 			$this->token			= $this->settings['token'];
 			$this->mode             = $this->settings['mode'];
 			$this->currency         = $this->settings['currency'];
-	        $this->notify_url   	= str_replace( 'https:', 'http:', add_query_arg( 'wc-api', 'wc_nihaopay', home_url( '/' ) ) );
+	        	$this->notify_url   	= add_query_arg('wc-api', 'wc_nihaopay', home_url('/'));
 
 			if( $this->mode == 'test' ){
 				$this->gateway_url = 'https://apitest.nihaopay.com/v1.2/transactions/securepay';
