@@ -26,9 +26,9 @@ function init_woocommerce_nihaopay() {
 			$plugin_dir = plugin_dir_url(__FILE__);
 
 	        $this->id               = 'nihaopay';
-	        $this->wechat_pay_icon     		= apply_filters( 'woocommerce_nihaopay_wechat_pay_icon', ''.$plugin_dir.'/WeChat-Pay.png' );
-	        $this->alipay_icon     		= apply_filters( 'woocommerce_nihaopay_alipay_icon', ''.$plugin_dir.'/AliPay.png' );
-	        $this->unionpay_icon     		= apply_filters( 'woocommerce_nihaopay_unionpay_icon', ''.$plugin_dir.'/UnionPay.png' );
+	        $this->wechatpay_icon     		= apply_filters( 'woocommerce_nihaopay_wechatpay_icon', ''.$plugin_dir.'/wechatpat_logo.png' );
+	        $this->alipay_icon     		= apply_filters( 'woocommerce_nihaopay_alipay_icon', ''.$plugin_dir.'/alipay_logo.png' );
+	        $this->unionpay_icon     		= apply_filters( 'woocommerce_nihaopay_unionpay_icon', ''.$plugin_dir.'/unionpay_logo.png' );
 	        $this->has_fields       = true;
 
 	        $this->init_form_fields();
@@ -67,11 +67,11 @@ function init_woocommerce_nihaopay() {
 		function get_icon() {
 			global $woocommerce;
 			$icon = '';
-			if ( $this->wechat_pay_icon ) {
-				$icon.= '<img src="' . $this->force_ssl( $this->wechat_pay_icon ) . '" alt="' . $this->title . '" width="82" height="26" />';
+			if ( $this->wechatpay_icon ) {
+				$icon.= '<img src="' . $this->force_ssl( $this->wechatpay_icon ) . '" alt="' . $this->title . '" width="29" height="26" />';
 			}
 			if ( $this->alipay_icon ) {
-				$icon.= '<img src="' . $this->force_ssl( $this->alipay_icon ) . '" alt="' . $this->title . '" width="74" height="26" />';
+				$icon.= '<img src="' . $this->force_ssl( $this->alipay_icon ) . '" alt="' . $this->title . '" width="26" height="26" />';
 			}
 			if ( $this->unionpay_icon ) {
 				$icon.= '<img src="' . $this->force_ssl( $this->unionpay_icon ) . '" alt="' . $this->title . '" width="42" height="26" />';
@@ -255,7 +255,7 @@ function init_woocommerce_nihaopay() {
 
 			if (!is_wp_error($response)) {
 	        	$resp=$response['body'];
-			$res=gzcompress(base64_encode(esc_attr($resp)));
+			$res=gzdeflate(base64_encode(esc_attr($resp)),9);
 	        	$redirect = $this->force_ssl( WP_PLUGIN_URL ."/" . plugin_basename( dirname(__FILE__) ) . '/redirect.php').'?res='. urlencode($res);
 				return array(
 					'result' 	=> 'success',
@@ -281,7 +281,7 @@ function init_woocommerce_nihaopay() {
 					</li>
 					<li class="wc_payment_method">
 						<input id="nihaopay_pay_method_wechatpay" class="input-radio" name="vendor" value="wechatpay" data-order_button_text="" type="radio" required>
-						<label for="nihaopay_pay_method_wechatpay"> WechatPay </label>
+						<label for="nihaopay_pay_method_wechatpay"> WeChatPay </label>
 					</li>
 					<li class="wc_payment_method">
 						<input id="nihaopay_pay_method_unionpay" class="input-radio" name="vendor" value="unionpay" data-order_button_text="" type="radio" required>
