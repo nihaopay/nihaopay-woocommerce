@@ -26,7 +26,7 @@ function init_woocommerce_nihaopay() {
 			$plugin_dir = plugin_dir_url(__FILE__);
 
 	        $this->id               = 'nihaopay';
-	        $this->wechatpay_icon     		= apply_filters( 'woocommerce_nihaopay_wechatpay_icon', ''.$plugin_dir.'/wechatpat_logo.png' );
+	        $this->wechatpay_icon     		= apply_filters( 'woocommerce_nihaopay_wechatpay_icon', ''.$plugin_dir.'/wechatpay_logo.png' );
 	        $this->alipay_icon     		= apply_filters( 'woocommerce_nihaopay_alipay_icon', ''.$plugin_dir.'/alipay_logo.png' );
 	        $this->unionpay_icon     		= apply_filters( 'woocommerce_nihaopay_unionpay_icon', ''.$plugin_dir.'/unionpay_logo.png' );
 	        $this->has_fields       = true;
