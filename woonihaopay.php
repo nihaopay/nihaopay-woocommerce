@@ -233,7 +233,6 @@ function init_woocommerce_nihaopay() {
 
 	        $nhp_arg['ipn_url']=$this->notify_url;
 	        $nhp_arg['callback_url']=$order->get_checkout_order_received_url();
-	        $nhp_arg['show_url']=$order->get_cancel_order_url();
 	        $nhp_arg['reference']=$orderid;
 	        $nhp_arg['vendor']=$_POST['vendor'];
 	        $nhp_arg['terminal']=$this->terminal;
