@@ -252,19 +252,15 @@ function init_woocommerce_nihaopay() {
 	        $nhp_arg['callback_url']=$order->get_checkout_order_received_url();
 	        $nhp_arg['reference']=$orderid;
 	        $nhp_arg['vendor']=$_POST['vendor'];
-			if ($_POST['vendor'] === 'wechatpay' ){
-	        	if ($this->is_weixin) {
-	        		$nhp_arg['terminal']= 'WAP';
-	        	}else{
-	        		$nhp_arg['terminal'] = 'ONLINE';
-	        	}
 
-	        }else{
-	        	 if($this->is_mobile){
-	        		$nhp_arg['terminal'] = 'WAP';
-	        	}else{
-	        		$nhp_arg['terminal'] = 'ONLINE';
-	        	}
+			if($this->is_mobile){
+				$nhp_arg['terminal'] = 'WAP';
+			} else {
+				$nhp_arg['terminal'] = 'ONLINE';
+			}
+
+			if ($_POST['vendor'] === 'wechatpay' ){
+				$nhp_arg['inWechat'] = $this->is_weixin ? 'true' : 'false';
 	        }
 	        
 	        $nhp_arg['note']=$order_id;
