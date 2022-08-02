@@ -8,7 +8,7 @@
 
 ### Description
 
-The NihaoPay Payment plugin helps you to accept AliPay, WechatPay,UnionPay on your WooCommerce Store using NihaoPay Accounts. [Apply a testing NihaoPay account](https://www.nihaopay.com/application)
+The NihaoPay Payment plugin helps you to accept AliPay, WechatPay,UnionPay on your WooCommerce Store using NihaoPay Accounts. [Apply a testing NihaoPay account](https://www.nihaopay.com/apply)
 
 ### Settings
 
