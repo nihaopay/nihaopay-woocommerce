@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>loading</title>
+</head>
+<body>
+    <script type="text/javascript">
+        function decode(str) {
+            let txt = document.createElement("textarea");
+            txt.innerHTML = str;
+            return txt.value;
+        }
+
+        function getUrlParams(key) {
+            var args = {};
+            var pairs = location.search.substring(1).split('&');
+            for (var i = 0; i < pairs.length; i++) {
+                var pos = pairs[i].indexOf('=');
+                if (pos === -1) {
+                    continue;
+                }
+                args[pairs[i].substring(0, pos)] = decodeURIComponent(pairs[i].substring(pos + 1));
+            }
+            return args[key] === undefined ? '' : args[key];
+        }
+
+        function runScripts(element) {
+            var list, scripts, index;
+            list = element.getElementsByTagName("script");
+            scripts = [];
+            for (index = 0; index < list.length; ++index) {
+                scripts[index] = list[index];
+            }
+            list = undefined;
+
+            continueLoading();
+
+            function continueLoading() {
+                var script, newscript;
+                while (scripts.length) {
+                    script = scripts[0];
+                    script.parentNode.removeChild(script);
+                    scripts.splice(0, 1);
+
+                    newscript = document.createElement('script');
+
+                    if (script.src) {
+                        newscript.onerror = continueLoadingOnError;
+                        newscript.onload = continueLoadingOnLoad;
+                        newscript.onreadystatechange = continueLoadingOnReady;
+                        newscript.src = script.src;
+                    } else {
+                        newscript.text = script.text;
+                    }
+
+                    document.documentElement.appendChild(newscript);
+
+                    if (script.src) {
+                        return;
+                    }
+                }
+
+                newscript = undefined;
+
+                function continueLoadingOnLoad() {
+                    if (this === newscript) {
+                        continueLoading();
+                    }
+                }
+
+                function continueLoadingOnError() {
+                    if (this === newscript) {
+                        continueLoading();
+                    }
+                }
+
+                function continueLoadingOnReady() {
+                    if (this === newscript && this.readyState === "complete") {
+                        continueLoading();
+                    }
+                }
+            }
+        }
+
+        var res = getUrlParams('res');
+        console.log('origin res:', res);
+
+        var content = atob(res);
+        content = decode(content);
+        document.documentElement.innerHTML = content;
+
+        
+        runScripts(document.documentElement);
+    </script>
+
+</body>
+
+</html>

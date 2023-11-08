@@ -282,7 +282,7 @@ function init_woocommerce_nihaopay() {
 			if (!is_wp_error($response)) {
 	        	$resp=$response['body'];
 				$res=base64_encode(esc_attr($resp));
-	        	$redirect = $this->force_ssl( WP_PLUGIN_URL ."/" . plugin_basename( dirname(__FILE__) ) . '/redirect.php').'?res='. urlencode($res);
+	        	$redirect = $this->force_ssl( WP_PLUGIN_URL ."/" . plugin_basename( dirname(__FILE__) ) . '/redirect.html').'?res='. urlencode($res);
 				return array(
 					'result' 	=> 'success',
 					'redirect'	=> $redirect
