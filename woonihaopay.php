@@ -282,7 +282,12 @@ function init_woocommerce_nihaopay() {
 			if (!is_wp_error($response)) {
 	        	$resp=$response['body'];
 				$res=base64_encode(esc_attr($resp));
-	        	$redirect = $this->force_ssl( WP_PLUGIN_URL ."/" . plugin_basename( dirname(__FILE__) ) . '/redirect.html').'?res='. urlencode($res);
+
+				// fix $res too long to cause '414 Request-URI Too Large' error
+	        	setcookie($order_id, $res, time() + 7200); // expire in 2 hours
+				$redirect = $this->force_ssl( WP_PLUGIN_URL ."/" . plugin_basename( dirname(__FILE__) ) . '/redirect.html').'?orderId='. urlencode($order_id);
+
+				// $redirect = $this->force_ssl( WP_PLUGIN_URL ."/" . plugin_basename( dirname(__FILE__) ) . '/redirect.html').'?res='. urlencode($res);
 				return array(
 					'result' 	=> 'success',
 					'redirect'	=> $redirect

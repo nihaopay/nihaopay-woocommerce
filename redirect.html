@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
+
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>loading</title>
 </head>
+
 <body>
     <script type="text/javascript">
         function decode(str) {
@@ -13,7 +15,16 @@
             return txt.value;
         }
 
-        function getUrlParams(key) {
+        function getCookie(name) {
+            let cookie = {};
+            document.cookie.split(';').forEach(function (el) {
+                let split = el.split('=');
+                cookie[split[0].trim()] = split.slice(1).join("=");
+            })
+            return cookie[name];
+        }
+
+        function getUrlParam(key) {
             var args = {};
             var pairs = location.search.substring(1).split('&');
             for (var i = 0; i < pairs.length; i++) {
@@ -24,6 +35,19 @@
                 args[pairs[i].substring(0, pos)] = decodeURIComponent(pairs[i].substring(pos + 1));
             }
             return args[key] === undefined ? '' : args[key];
+        }
+
+        function getUrlParams() {
+            var args = {};
+            var pairs = location.search.substring(1).split('&');
+            for (var i = 0; i < pairs.length; i++) {
+                var pos = pairs[i].indexOf('=');
+                if (pos === -1) {
+                    continue;
+                }
+                args[pairs[i].substring(0, pos)] = decodeURIComponent(pairs[i].substring(pos + 1));
+            }
+            return args;
         }
 
         function runScripts(element) {
@@ -84,14 +108,29 @@
             }
         }
 
-        var res = getUrlParams('res');
-        console.log('origin res:', res);
+        function contentDecode(res) {
+            var content = atob(decodeURIComponent(res));
+            return decode(content);
+        }
 
-        var content = atob(res);
-        content = decode(content);
-        document.documentElement.innerHTML = content;
+        function getContent() {
+            var defaultErrorHtml = '<h1>unknown mistake!</h1>';
+            var params = getUrlParams();
+            if ('orderId' in params) {
+                var res = getCookie(params['orderId']);
+                if (res) {
+                    return contentDecode(res);
+                } else {
+                    return defaultErrorHtml;
+                }
+            } else if ('res' in params) {
+                return contentDecode(params['res']);
+            } else {
+                return defaultErrorHtml;
+            }
+        }
 
-        
+        document.documentElement.innerHTML = getContent();
         runScripts(document.documentElement);
     </script>
 
