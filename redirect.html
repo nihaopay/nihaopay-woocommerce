@@ -24,6 +24,14 @@
             return cookie[name];
         }
 
+        function setCookie(name, value) {
+            document.cookie = name + '=' + value + '; Path=/;';
+        }
+
+        function deleteCookie(name) {
+            document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        }
+
         function getUrlParam(key) {
             var args = {};
             var pairs = location.search.substring(1).split('&');
@@ -114,19 +122,20 @@
         }
 
         function getContent() {
-            var defaultErrorHtml = '<h1>unknown mistake!</h1>';
             var params = getUrlParams();
             if ('orderId' in params) {
-                var res = getCookie(params['orderId']);
+                var cookieName = params['orderId'];
+                var res = getCookie(cookieName);
                 if (res) {
+                    deleteCookie(cookieName);
                     return contentDecode(res);
                 } else {
-                    return defaultErrorHtml;
+                    return '<h1>cant\'t get order info by orderId</h1>';
                 }
             } else if ('res' in params) {
                 return contentDecode(params['res']);
             } else {
-                return defaultErrorHtml;
+                return '<h1>cant\'t get order info </h1>';;
             }
         }
 
