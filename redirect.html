@@ -15,23 +15,6 @@
             return txt.value;
         }
 
-        function getCookie(name) {
-            let cookie = {};
-            document.cookie.split(';').forEach(function (el) {
-                let split = el.split('=');
-                cookie[split[0].trim()] = split.slice(1).join("=");
-            })
-            return cookie[name];
-        }
-
-        function setCookie(name, value) {
-            document.cookie = name + '=' + value + '; Path=/;';
-        }
-
-        function deleteCookie(name) {
-            document.cookie = name + '=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
-        }
-
         function getUrlParam(key) {
             var args = {};
             var pairs = location.search.substring(1).split('&');
@@ -56,6 +39,21 @@
                 args[pairs[i].substring(0, pos)] = decodeURIComponent(pairs[i].substring(pos + 1));
             }
             return args;
+        }
+
+        function getSessionData(orderId, cb) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('GET', '/wp-admin/admin-ajax.php?action=get_session_data&orderId=' + orderId, true);
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    var responseData = JSON.parse(xhr.responseText);
+                    var dataForKey = responseData[orderId];
+                    cb(dataForKey);
+                } else {
+                    cb(null);
+                }
+            };
+            xhr.send();
         }
 
         function runScripts(element) {
@@ -124,23 +122,26 @@
         function getContent() {
             var params = getUrlParams();
             if ('orderId' in params) {
-                var cookieName = params['orderId'];
-                var res = getCookie(cookieName);
-                if (res) {
-                    deleteCookie(cookieName);
-                    return contentDecode(res);
-                } else {
-                    return '<h1>cant\'t get order info by orderId</h1>';
-                }
+                var orderId = params['orderId'];
+                getSessionData(orderId, function (res) {
+                    if (res) {
+                        document.documentElement.innerHTML = contentDecode(res);
+                        runScripts(document.documentElement);
+                    } else {
+                        document.documentElement.innerHTML = '<h1>cant\'t get order info by orderId</h1>';
+                        runScripts(document.documentElement);
+                    }
+                });
             } else if ('res' in params) {
-                return contentDecode(params['res']);
+                document.documentElement.innerHTML = contentDecode(params['res']);
+                runScripts(document.documentElement);
             } else {
-                return '<h1>cant\'t get order info </h1>';;
+                document.documentElement.innerHTML = '<h1>cant\'t get order info by orderId</h1>';
+                runScripts(document.documentElement);
             }
         }
 
-        document.documentElement.innerHTML = getContent();
-        runScripts(document.documentElement);
+        getContent();
     </script>
 
 </body>

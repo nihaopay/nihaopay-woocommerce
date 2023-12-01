@@ -202,6 +202,7 @@ function init_woocommerce_nihaopay() {
 					</form>';
 
 		}
+
 		function isMobile()
     	{
     	    $useragent = $_SERVER['HTTP_USER_AGENT'];
@@ -282,12 +283,8 @@ function init_woocommerce_nihaopay() {
 			if (!is_wp_error($response)) {
 	        	$resp=$response['body'];
 				$res=base64_encode(esc_attr($resp));
-
-				// fix $res too long to cause '414 Request-URI Too Large' error
-	        	setcookie($order_id, $res, time() + 7200); // expire in 2 hours
+				$woocommerce->session->set($order_id, $res);
 				$redirect = $this->force_ssl( WP_PLUGIN_URL ."/" . plugin_basename( dirname(__FILE__) ) . '/redirect.html').'?orderId='. urlencode($order_id);
-
-				// $redirect = $this->force_ssl( WP_PLUGIN_URL ."/" . plugin_basename( dirname(__FILE__) ) . '/redirect.html').'?res='. urlencode($res);
 				return array(
 					'result' 	=> 'success',
 					'redirect'	=> $redirect
@@ -341,6 +338,7 @@ function init_woocommerce_nihaopay() {
 			return $url;
 		}
 
+
 		function check_ipn_response() {
             global $woocommerce;
             @ob_clean();
@@ -369,4 +367,17 @@ function init_woocommerce_nihaopay() {
 	    return $methods;
 	}
 	add_filter('woocommerce_payment_gateways', 'add_nihaopay_gateway' );
+
+	// add session data get action
+	add_action('wp_ajax_get_session_data', 'get_session_data_callback');
+	add_action('wp_ajax_nopriv_get_session_data', 'get_session_data_callback');
+
+	// get order data by ajax 
+	function get_session_data_callback() {
+    	global $woocommerce;
+    	$key_to_get = isset($_GET['orderId']) ? sanitize_text_field($_GET['orderId']) : '';
+    	$data = $woocommerce->session->get($key_to_get);
+    	wp_send_json([$key_to_get => $data]);
+    	wp_die();
+	}
 }
