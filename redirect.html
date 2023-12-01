@@ -115,7 +115,8 @@
         }
 
         function contentDecode(res) {
-            var content = atob(decodeURIComponent(res));
+            // var content = atob(decodeURIComponent(res));
+            var content = atob(res);
             return decode(content);
         }
 
