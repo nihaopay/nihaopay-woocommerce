@@ -240,12 +240,12 @@ function init_woocommerce_nihaopay() {
 	        $nhp_arg['currency']=$this->currency;
 
 	        if($mark_currency =='CNY'){
-	        	$nhp_arg['rmb_amount']=$order->order_total * 100;
+	        	$nhp_arg['rmb_amount']= intval($order->order_total * 100);
 	        }else{
 	        	if($mark_currency != 'JPY') {
-					$nhp_arg['amount']=$order->order_total * 100;
+					$nhp_arg['amount']= intval($order->order_total * 100);
 				} else {
-					$nhp_arg['amount']=$order->order_total;
+					$nhp_arg['amount']= intval($order->order_total);
 				}
 	        }
 
@@ -281,8 +281,8 @@ function init_woocommerce_nihaopay() {
 											));
 
 			if (!is_wp_error($response)) {
-	        	$resp=$response['body'];
-				$res=base64_encode(esc_attr($resp));
+	        	$resp = $response['body'];
+				$res = esc_attr($resp);
 				$woocommerce->session->set($order_id, $res);
 				$redirect = $this->force_ssl( WP_PLUGIN_URL ."/" . plugin_basename( dirname(__FILE__) ) . '/redirect.html').'?orderId='. urlencode($order_id);
 				return array(

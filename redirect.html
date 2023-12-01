@@ -114,19 +114,13 @@
             }
         }
 
-        function contentDecode(res) {
-            // var content = atob(decodeURIComponent(res));
-            var content = atob(res);
-            return decode(content);
-        }
-
         function getContent() {
             var params = getUrlParams();
             if ('orderId' in params) {
                 var orderId = params['orderId'];
                 getSessionData(orderId, function (res) {
                     if (res) {
-                        document.documentElement.innerHTML = contentDecode(res);
+                        document.documentElement.innerHTML = decode(res);
                         runScripts(document.documentElement);
                     } else {
                         document.documentElement.innerHTML = '<h1>cant\'t get order info by orderId</h1>';
