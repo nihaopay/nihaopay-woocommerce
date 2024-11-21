@@ -220,6 +220,17 @@ function init_woocommerce_nihaopay() {
         	return false;
     	}
 
+		function encodeChineseCharacters($url) {
+			// 使用正则匹配中文字符，并仅对其进行编码
+			return preg_replace_callback(
+				'/[\x{4e00}-\x{9fa5}]+/u', // 匹配中文字符范围
+				function ($matches) {
+					return urlencode($matches[0]); // 对匹配的中文部分进行编码
+				},
+				$url
+			);
+		}
+
 		/**
 		*
 	    * process payment
@@ -241,7 +252,7 @@ function init_woocommerce_nihaopay() {
 
 	        if($mark_currency =='CNY'){
 	        	$nhp_arg['rmb_amount']= intval($order->order_total * 100);
-	        }else{
+	        } else {
 	        	if($mark_currency != 'JPY') {
 					$nhp_arg['amount']= intval($order->order_total * 100);
 				} else {
@@ -250,7 +261,7 @@ function init_woocommerce_nihaopay() {
 	        }
 
 	        $nhp_arg['ipn_url']=$this->notify_url;
-	        $nhp_arg['callback_url']=$order->get_checkout_order_received_url();
+	        $nhp_arg['callback_url']= $this->encodeChineseCharacters($order->get_checkout_order_received_url());
 	        $nhp_arg['reference']=$orderid;
 	        $nhp_arg['vendor']=$_POST['vendor'];
 
