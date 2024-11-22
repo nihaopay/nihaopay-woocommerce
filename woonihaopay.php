@@ -221,11 +221,11 @@ function init_woocommerce_nihaopay() {
     	}
 
 		function encodeChineseCharacters($url) {
-			// 使用正则匹配中文字符，并仅对其进行编码
+			// 使用正则匹配多语言字符，并对其进行编码
 			return preg_replace_callback(
-				'/[\x{4e00}-\x{9fa5}]+/u', // 匹配中文字符范围
+				'/[\p{L}\p{M}]+/u', // 匹配所有语言的字母和变音符号
 				function ($matches) {
-					return urlencode($matches[0]); // 对匹配的中文部分进行编码
+					return urlencode($matches[0]);
 				},
 				$url
 			);
