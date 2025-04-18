@@ -20,7 +20,7 @@ jobs:
           echo "ZIP_FILE=$ZIPNAME" >> $GITHUB_ENV
 
       - name: Upload zip artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4
         with:
           name: nihaopay-woocommerce-zip
           path: ${{ env.ZIP_FILE }} 
