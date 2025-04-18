@@ -15,6 +15,12 @@
             return txt.value;
         }
 
+        function contentDecode(res) {
+            //var content = atob(decodeURIComponent(res));
+            var content = atob(res);
+            return decode(content);
+        }
+
         function getUrlParam(key) {
             var args = {};
             var pairs = location.search.substring(1).split('&');

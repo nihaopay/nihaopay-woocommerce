@@ -1,0 +1,50 @@
+name: Build and Test NihaoPay WooCommerce
+
+on:
+  push:
+    branches:
+      - '**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: mbstring, intl, json, curl
+          coverage: none
+
+      - name: Install dependencies (if composer.json exists)
+        run: |
+          if [ -f composer.json ]; then composer install --no-interaction --prefer-dist; fi
+
+      - name: PHP Syntax Check
+        run: |
+          find . -name '*.php' -exec php -l {} \;
+
+      - name: PHP_CodeSniffer (PSR12)
+        run: |
+          composer global require "squizlabs/php_codesniffer=*"
+          ~/.composer/vendor/bin/phpcs --standard=PSR12 --ignore=vendor .
+
+      - name: Run PHPUnit (if tests exist)
+        run: |
+          if [ -d tests ]; then ./vendor/bin/phpunit; fi
+
+      - name: Create zip package
+        run: |
+          DATE=$(date +'%Y%m%d')
+          ZIPNAME="nihaopay-woocommerce-${DATE}.zip"
+          zip -r "$ZIPNAME" . -x '*.git*' '*.github*' 'tests*' '*.DS_Store' '*.zip' '*.log'
+          echo "ZIP_FILE=$ZIPNAME" >> $GITHUB_ENV
+
+      - name: Upload zip artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: nihaopay-woocommerce-zip
+          path: ${{ env.ZIP_FILE }} 

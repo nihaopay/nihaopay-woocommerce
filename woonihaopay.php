@@ -165,6 +165,24 @@ function init_woocommerce_nihaopay() {
 													),
 			                    'default' => 'live',
 								'description' => __( 'Test or Live', 'woocommerce' )
+							),
+				'enable_alipay' => array(
+								'title' => __( 'Enable AliPay', 'woocommerce' ),
+								'type' => 'checkbox',
+								'label' => __( 'Enable AliPay payment method', 'woocommerce' ),
+								'default' => 'yes'
+							),
+				'enable_wechatpay' => array(
+								'title' => __( 'Enable WeChatPay', 'woocommerce' ),
+								'type' => 'checkbox',
+								'label' => __( 'Enable WeChatPay payment method', 'woocommerce' ),
+								'default' => 'yes'
+							),
+				'enable_unionpay' => array(
+								'title' => __( 'Enable UnionPay', 'woocommerce' ),
+								'type' => 'checkbox',
+								'label' => __( 'Enable UnionPay payment method', 'woocommerce' ),
+								'default' => 'yes'
 							)
 				);
 		}
@@ -263,7 +281,21 @@ function init_woocommerce_nihaopay() {
 	        $nhp_arg['ipn_url']=$this->notify_url;
 	        $nhp_arg['callback_url']= $this->encodeChineseCharacters($order->get_checkout_order_received_url());
 	        $nhp_arg['reference']=$orderid;
-	        $nhp_arg['vendor']=$_POST['vendor'];
+	        
+	        // 确保所选支付方式已启用
+	        $vendor = isset($_POST['vendor']) ? $_POST['vendor'] : '';
+	        if ($vendor === 'alipay' && (!isset($this->settings['enable_alipay']) || $this->settings['enable_alipay'] !== 'yes')) {
+	            $woocommerce->add_error(__('AliPay is not enabled.', 'woocommerce'));
+	            return;
+	        } else if ($vendor === 'wechatpay' && (!isset($this->settings['enable_wechatpay']) || $this->settings['enable_wechatpay'] !== 'yes')) {
+	            $woocommerce->add_error(__('WeChatPay is not enabled.', 'woocommerce'));
+	            return;
+	        } else if ($vendor === 'unionpay' && (!isset($this->settings['enable_unionpay']) || $this->settings['enable_unionpay'] !== 'yes')) {
+	            $woocommerce->add_error(__('UnionPay is not enabled.', 'woocommerce'));
+	            return;
+	        }
+	        
+	        $nhp_arg['vendor'] = $vendor;
 
 			if($this->is_mobile){
 				$nhp_arg['terminal'] = 'WAP';
@@ -310,22 +342,74 @@ function init_woocommerce_nihaopay() {
 		function payment_fields() {
 				global $woocommerce;
 				?>
+				<style>
+				/* 强制让支付方式图标和支付选项区域上下排列 */
+				.payment_method_nihaopay {
+					display: block !important;
+					width: 100% !important;
+				}
+				.payment_method_nihaopay > label {
+					display: block !important;
+					width: 100% !important;
+					margin-bottom: 10px;
+				}
+				.payment_method_nihaopay > .payment_box {
+					display: block !important;
+					width: 100% !important;
+					margin: 0 !important;
+					box-sizing: border-box;
+				}
+				/* 保持支付选项内部一行显示 */
+				.payment_methods {
+					margin: 0;
+					padding: 0;
+					list-style: none;
+				}
+				.wc_payment_method {
+					margin: 10px 0;
+					padding: 0;
+					display: flex;
+					align-items: center;
+				}
+				.wc_payment_method input[type="radio"] {
+					margin-right: 8px;
+					vertical-align: middle;
+				}
+				.wc_payment_method label {
+					display: inline-block;
+					font-weight: normal;
+					vertical-align: middle;
+					cursor: pointer;
+					margin: 0;
+				}
+				.payment-method-title {
+					margin-bottom: 15px;
+					padding-bottom: 5px;
+					border-bottom: 1px solid #eee;
+				}
+				</style>
 				<?php if ($this->description) : ?><p><?php echo $this->description; ?></p><?php endif; ?>
 				<fieldset>
-				<legend><label>Method of payment<span class="required">*</span></label></legend>
+				<legend class="payment-method-title"><label>Method of payment<span class="required">*</span></label></legend>
 				<ul class="wc_payment_methods payment_methods methods">
+					<?php if (isset($this->settings['enable_alipay']) && $this->settings['enable_alipay'] === 'yes') : ?>
 					<li class="wc_payment_method">
 						<input id="nihaopay_pay_method_alipay" class="input-radio" name="vendor" checked="checked" value="alipay" data-order_button_text="" type="radio" required>
-						<label for="nihaopay_pay_method_alipay"> AliPay </label>
+						<label for="nihaopay_pay_method_alipay">AliPay</label>
 					</li>
+					<?php endif; ?>
+					<?php if (isset($this->settings['enable_wechatpay']) && $this->settings['enable_wechatpay'] === 'yes') : ?>
 					<li class="wc_payment_method">
-						<input id="nihaopay_pay_method_wechatpay" class="input-radio" name="vendor" value="wechatpay" data-order_button_text="" type="radio" required>
-						<label for="nihaopay_pay_method_wechatpay"> WeChatPay </label>
+						<input id="nihaopay_pay_method_wechatpay" class="input-radio" name="vendor" value="wechatpay" data-order_button_text="" type="radio" required <?php if (!isset($this->settings['enable_alipay']) || $this->settings['enable_alipay'] !== 'yes') echo 'checked=\"checked\"'; ?>>
+						<label for="nihaopay_pay_method_wechatpay">WeChatPay</label>
 					</li>
+					<?php endif; ?>
+					<?php if (isset($this->settings['enable_unionpay']) && $this->settings['enable_unionpay'] === 'yes') : ?>
 					<li class="wc_payment_method">
-						<input id="nihaopay_pay_method_unionpay" class="input-radio" name="vendor" value="unionpay" data-order_button_text="" type="radio" required>
-						<label for="nihaopay_pay_method_unionpay"> UnionPay </label>
+						<input id="nihaopay_pay_method_unionpay" class="input-radio" name="vendor" value="unionpay" data-order_button_text="" type="radio" required <?php if ((!isset($this->settings['enable_alipay']) || $this->settings['enable_alipay'] !== 'yes') && (!isset($this->settings['enable_wechatpay']) || $this->settings['enable_wechatpay'] !== 'yes')) echo 'checked=\"checked\"'; ?>>
+						<label for="nihaopay_pay_method_unionpay">UnionPay</label>
 					</li>
+					<?php endif; ?>
 				</ul>
 				<div class="clear"></div>
 				</fieldset>
