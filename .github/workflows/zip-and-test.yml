@@ -1,4 +1,4 @@
-name: Build NihaoPay WooCommerce Zip
+name: Build and Release NihaoPay WooCommerce Zip
 
 on:
   push:
@@ -18,6 +18,28 @@ jobs:
           ZIPNAME="nihaopay-woocommerce-${DATE}.zip"
           zip -r "$ZIPNAME" . -x '*.git*' '*.github*' 'tests*' '*.DS_Store' '*.zip' '*.log'
           echo "ZIP_FILE=$ZIPNAME" >> $GITHUB_ENV
+          echo "RELEASE_TAG=release-$DATE" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.RELEASE_TAG }}
+          release_name: "Release ${{ env.RELEASE_TAG }}"
+          draft: false
+          prerelease: false
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ env.ZIP_FILE }}
+          asset_name: ${{ env.ZIP_FILE }}
+          asset_content_type: application/zip
 
       - name: Upload zip artifact
         uses: actions/upload-artifact@v4
