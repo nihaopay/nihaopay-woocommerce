@@ -327,13 +327,12 @@ function init_woocommerce_nihaopay() {
 	        	$resp = $response['body'];
 				$res = esc_attr($resp);
 				$woocommerce->session->set($order_id, $res);
-				// $redirect = $this->force_ssl( WP_PLUGIN_URL ."/" . plugin_basename( dirname(__FILE__) ) . '/redirect.html').'?orderId='. urlencode($order_id);
-				$redirect = $this->force_ssl(plugins_url('redirect.html', __FILE__)) . '?orderId=' . urlencode($order_id);
+				$redirect = $this->force_ssl(plugins_url('redirect.php', __FILE__)) . '?orderId=' . urlencode($order_id);
 				return array(
 					'result' 	=> 'success',
 					'redirect'	=> $redirect
 				);
-	        }else{
+	        } else {
 	        	$woocommerce->add_error( __('Gateway Error.', 'woocommerce') );
 	        }
 		}
@@ -433,7 +432,6 @@ function init_woocommerce_nihaopay() {
 			}
 			return $url;
 		}
-
 
 		function check_ipn_response() {
             global $woocommerce;
