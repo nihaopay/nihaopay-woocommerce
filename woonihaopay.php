@@ -2,7 +2,7 @@
 /**
  * Plugin Name: NihaoPay Gateway for WooCommerce
  * Description: Allows you to use UnionPay, AliPay and WechatPay through NihaoPay Gateway
- * Version: 1.0.2
+ * Version: 1.0.3
  * Author: nihaopay
  * Author URI: https://nihaopay.com
  *
@@ -196,7 +196,7 @@ function init_woocommerce_nihaopay() {
 
 			wc_enqueue_js('
 					jQuery("body").block({
-							message: "<img src=\"'.esc_url( $woocommerce->plugin_url() ).'/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" style=\"float:left; margin-right: 10px;\" />'.__('Thank you for your order. We are now redirecting you to verify your card.', 'woothemes').'",
+							message: "<img src="' . esc_url( $woocommerce->plugin_url() ) . '/assets/images/ajax-loader.gif\" alt=\"Redirecting...\" style=\"float:left; margin-right: 10px;\" />' . __('Thank you for your order. We are now redirecting you to verify your card.', 'woothemes') . '",
 							overlayCSS:
 							{
 								background: "#fff",
@@ -215,8 +215,8 @@ function init_woocommerce_nihaopay() {
 					jQuery("#submit_nihaopay_payment_form").click();
 				');
 
-				return '<form action="'.esc_url( get_transient('nihaopay_next_url') ).'" method="post" id="nihaopay_payment_form">
-						<input type="submit" class="button alt" id="submit_nihaopay_payment_form" value="'.__('Submit', 'woothemes').'" /> <a class="button cancel" href="'.esc_url( $order->get_cancel_order_url() ).'">'.__('Cancel order', 'woothemes').'</a>
+				return '<form action="' . esc_url( get_transient('nihaopay_next_url') ) . '" method="post" id="nihaopay_payment_form">
+						<input type="submit" class="button alt" id="submit_nihaopay_payment_form" value="' . __('Submit', 'woothemes') . '" /> <a class="button cancel" href="' . esc_url( $order->get_cancel_order_url() ) . '">' . __('Cancel order', 'woothemes') . '</a>
 					</form>';
 
 		}
@@ -327,7 +327,7 @@ function init_woocommerce_nihaopay() {
 	        	$resp = $response['body'];
 				$res = esc_attr($resp);
 				$woocommerce->session->set($order_id, $res);
-				$redirect = $this->force_ssl(plugins_url('redirect.php', __FILE__)) . '?orderId=' . urlencode($order_id);
+				$redirect = add_query_arg('orderId', $order_id, home_url('/nihaopay-redirect/'));
 				return array(
 					'result' 	=> 'success',
 					'redirect'	=> $redirect
@@ -420,7 +420,7 @@ function init_woocommerce_nihaopay() {
 		 **/
 		function receipt_page( $order ) {
 			global $woocommerce;
-			echo '<p>'.__('Thank you for your order.', 'woothemes').'</p>';
+			echo '<p>' . __('Thank you for your order.', 'woothemes') . '</p>';
 
 			echo $this->generate_nihaopay_form( $order );
 
@@ -474,4 +474,144 @@ function init_woocommerce_nihaopay() {
     	wp_send_json([$key_to_get => $data]);
     	wp_die();
 	}
+
+	// 在插件主文件作用域下添加以下代码，实现 endpoint 和页面输出
+	add_action('init', function() {
+	    add_rewrite_rule('^nihaopay-redirect/?$', 'index.php?nihaopay_redirect=1', 'top');
+	    add_rewrite_tag('%nihaopay_redirect%', '1');
+	});
+
+	add_action('template_redirect', function() {
+	    if (get_query_var('nihaopay_redirect')) {
+	        ?><!DOCTYPE html>
+	        <html>
+	        <head>
+	            <meta charset="utf-8">
+	            <meta name="viewport" content="width=device-width, initial-scale=1">
+	            <title>loading</title>
+	        </head>
+	        <body>
+	        <script type="text/javascript">
+	        function decode(str) {
+	            let txt = document.createElement("textarea");
+	            txt.innerHTML = str;
+	            return txt.value;
+	        }
+	        function contentDecode(res) {
+	            var content = atob(res);
+	            return decode(content);
+	        }
+	        function getUrlParam(key) {
+	            var args = {};
+	            var pairs = location.search.substring(1).split('&');
+	            for (var i = 0; i < pairs.length; i++) {
+	                var pos = pairs[i].indexOf('=');
+	                if (pos === -1) {
+	                    continue;
+	                }
+	                args[pairs[i].substring(0, pos)] = decodeURIComponent(pairs[i].substring(pos + 1));
+	            }
+	            return args[key] === undefined ? '' : args[key];
+	        }
+	        function getUrlParams() {
+	            var args = {};
+	            var pairs = location.search.substring(1).split('&');
+	            for (var i = 0; i < pairs.length; i++) {
+	                var pos = pairs[i].indexOf('=');
+	                if (pos === -1) {
+	                    continue;
+	                }
+	                args[pairs[i].substring(0, pos)] = decodeURIComponent(pairs[i].substring(pos + 1));
+	            }
+	            return args;
+	        }
+	        function getSessionData(orderId, cb) {
+	            var xhr = new XMLHttpRequest();
+	            xhr.open('GET', '/wp-admin/admin-ajax.php?action=get_session_data&orderId=' + orderId, true);
+	            xhr.onreadystatechange = function () {
+	                if (xhr.readyState === 4 && xhr.status === 200) {
+	                    var responseData = JSON.parse(xhr.responseText);
+	                    var dataForKey = responseData[orderId];
+	                    cb(dataForKey);
+	                } else {
+	                    cb(null);
+	                }
+	            };
+	            xhr.send();
+	        }
+	        function runScripts(element) {
+	            var list, scripts, index;
+	            list = element.getElementsByTagName("script");
+	            scripts = [];
+	            for (index = 0; index < list.length; ++index) {
+	                scripts[index] = list[index];
+	            }
+	            list = undefined;
+	            continueLoading();
+	            function continueLoading() {
+	                var script, newscript;
+	                while (scripts.length) {
+	                    script = scripts[0];
+	                    script.parentNode.removeChild(script);
+	                    scripts.splice(0, 1);
+	                    newscript = document.createElement('script');
+	                    if (script.src) {
+	                        newscript.onerror = continueLoadingOnError;
+	                        newscript.onload = continueLoadingOnLoad;
+	                        newscript.onreadystatechange = continueLoadingOnReady;
+	                        newscript.src = script.src;
+	                    } else {
+	                        newscript.text = script.text;
+	                    }
+	                    document.documentElement.appendChild(newscript);
+	                    if (script.src) {
+	                        return;
+	                    }
+	                }
+	                newscript = undefined;
+	                function continueLoadingOnLoad() {
+	                    if (this === newscript) {
+	                        continueLoading();
+	                    }
+	                }
+	                function continueLoadingOnError() {
+	                    if (this === newscript) {
+	                        continueLoading();
+	                    }
+	                }
+	                function continueLoadingOnReady() {
+	                    if (this === newscript && this.readyState === "complete") {
+	                        continueLoading();
+	                    }
+	                }
+	            }
+	        }
+	        function getContent() {
+	            var params = getUrlParams();
+	            if ('orderId' in params) {
+	                var orderId = params['orderId'];
+	                getSessionData(orderId, function (res) {
+	                    if (res) {
+	                        document.documentElement.innerHTML = decode(res);
+	                        runScripts(document.documentElement);
+	                    } else {
+	                        document.documentElement.innerHTML = '<h1>cant\'t get order info by orderId</h1>';
+	                        runScripts(document.documentElement);
+	                    }
+	                });
+	            } else if ('res' in params) {
+	                document.documentElement.innerHTML = contentDecode(params['res']);
+	                runScripts(document.documentElement);
+	            } else {
+	                document.documentElement.innerHTML = '<h1>cant\'t get order info by orderId</h1>';
+	                runScripts(document.documentElement);
+	            }
+	        }
+	        getContent();
+	        </script>
+	        </body>
+	        </html><?php
+	        exit;
+	    }
+	});
 }
