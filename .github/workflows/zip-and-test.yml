@@ -15,7 +15,7 @@ jobs:
       - name: Create zip package
         run: |
           DATE=$(date +'%Y%m%d')
-          ZIPNAME="nihaopay-woocommerce.zip"
+          ZIPNAME="nihaopay-woocommerce-${DATE}.zip"
           zip -r "$ZIPNAME" . -x '*.git*' '*.github*' 'tests*' '*.DS_Store' '*.zip' '*.log'
           echo "ZIP_FILE=$ZIPNAME" >> $GITHUB_ENV
           echo "RELEASE_TAG=release-$DATE" >> $GITHUB_ENV

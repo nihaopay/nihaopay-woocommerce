@@ -1,0 +1,47 @@
+= NihaoPay Gateway for WooCommerce Changelog =
+
+== English Version ==
+
+== 1.0.2 - 2025-04-25 ==
+* Enhancement: Payment method UI optimization with icons and option areas vertically aligned
+* Enhancement: Payment options display improved to show inline for better appearance
+* New: Added payment method enable/disable options for admin to control each payment channel individually
+* Enhancement: Improved Chinese character URL encoding handling
+* Fix: Enhanced session data processing
+
+== 1.0.1 - 2023-10-15 ==
+* Fix: Resolved display issues on mobile devices
+* Fix: Fixed incorrect amount calculations for certain currencies
+* Enhancement: Added better error handling
+* Enhancement: Optimized payment flow user experience
+
+== 1.0.0 - 2023-05-01 ==
+* Initial release
+* Support for AliPay payment
+* Support for WeChatPay payment
+* Support for UnionPay payment
+* Support for multiple currencies: USD, GBP, HKD, JPY, EUR, CAD, CNY
+* Test and production environment configuration
+
+== 中文版本 ==
+
+== 1.0.2 - 2025-04-25 ==
+* 改进：支付方式UI优化，图标和选项区域垂直排列
+* 改进：支付选项在同一行内显示更美观
+* 新增：支付方式启用/禁用选项，管理员可单独控制各支付渠道
+* 改进：优化中文字符URL编码处理
+* 修复：会话数据处理改进
+
+== 1.0.1 - 2023-10-15 ==
+* 修复：解决移动设备上显示问题
+* 修复：解决部分货币金额计算错误
+* 改进：添加更好的错误处理
+* 改进：优化支付流程用户体验
+
+== 1.0.0 - 2023-05-01 ==
+* 初始版本发布
+* 支持支付宝(AliPay)支付
+* 支持微信支付(WeChatPay)支付
+* 支持银联(UnionPay)支付
+* 支持多种货币：USD、GBP、HKD、JPY、EUR、CAD、CNY
+* 提供测试和生产环境配置
