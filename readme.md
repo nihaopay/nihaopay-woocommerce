@@ -1,9 +1,10 @@
 ## NihaoPay Gateway for WooCommerce
 * Contributors: NihaoPay
-* Tags: nihaopay,alipay,wechatpay,unionpay,ecommerce, payment gateway, wordpress, woocommerce
+* Tags: nihaopay, alipay, wechatpay, unionpay, paypal, ecommerce, payment gateway, wordpress, woocommerce
 * Requires at least: 3.5
 * Tested up to: 6.8.1
 * WooCommerce version: <= 9.7.1
+* You can try this [project](https://github.com/nihaopay/woocommerce-nihaopay-checkout) if your version of Woocommerce is higher than 9.7.1 
 
 ## NihaoPay Gateway for accepting payments on your WooCommerce Store.
 
