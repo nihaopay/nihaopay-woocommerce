@@ -2,6 +2,9 @@
 
 == English Version ==
 
+== 1.0.4 - 2026-11-02 ==
+* Enhancement: General gateway plugin security enhancements
+
 == 1.0.2 - 2025-04-25 ==
 * Enhancement: Payment method UI optimization with icons and option areas vertically aligned
 * Enhancement: Payment options display improved to show inline for better appearance
@@ -24,6 +27,9 @@
 * Test and production environment configuration
 
 == 中文版本 ==
+
+== 1.0.4 - 2026-11-02 ==
+* 改进：网关插件常规安全性增强
 
 == 1.0.2 - 2025-04-25 ==
 * 改进：支付方式UI优化，图标和选项区域垂直排列
